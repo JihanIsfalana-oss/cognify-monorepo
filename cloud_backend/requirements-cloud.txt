@@ -1,0 +1,15 @@
+# Web Framework & Server
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+
+# Cloud & Database
+firebase-admin==6.4.0
+
+# NLP & Data Science
+spacy==3.7.2
+scikit-learn==1.4.0
+numpy==1.26.3
+
+# Environment & Utils
+python-dotenv==1.0.1

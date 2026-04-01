@@ -1,0 +1,17 @@
+# Python Virtual Environments
+**/venv-cloud/
+**/venv-edge/
+**/venv-train/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# AI Models (abaikan file temporary)
+ai_engine/data/raw/
+*.tmp

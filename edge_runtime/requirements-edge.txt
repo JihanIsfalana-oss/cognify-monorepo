@@ -1,0 +1,12 @@
+# Intel Edge AI Runtime
+openvino==2023.3.0
+
+# Hardware & IoT Communication
+pyserial==3.5
+paho-mqtt==1.6.1
+
+# Computer Vision
+opencv-python-headless==4.9.0.80
+
+# Environment
+python-dotenv==1.0.1
