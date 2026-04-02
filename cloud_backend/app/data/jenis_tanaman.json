@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-04-02",
+    "description": "Dataset Komoditas Pertanian Indonesia Terintegrasi Parameter FAO-56",
+    "total_entries": 8,
+    "source_formats_parsed": ["PDF (Laporan BPS)", "CSV (Data Panen Kementan)", "XLSX (Tabel Kc FAO)"]
+  
+  },
+  "data": [
+    {
+      "id_komoditas": "CROP-001",
+      "nama_umum": "Padi",
+      "nama_ilmiah": "Oryza sativa",
+      "kategori": "Pangan Utama",
+      "varietas_populer": ["Inpari 32", "Inpari 42", "Ciherang", "Sintanur", "Mapan 05", "Mentik Wangi"],
+      "fase_tumbuh_hari": 120,
+      "parameter_biofisik": { "optimal_ph_min": 5.5, "optimal_ph_max": 6.5, "toleransi_salinitas_ds_m": 3.0 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.30, "fase_vegetatif_aktif": 1.15, "fase_pematangan": 0.40 }
+    },
+    {
+      "id_komoditas": "CROP-002",
+      "nama_umum": "Bawang Merah",
+      "nama_ilmiah": "Allium cepa aggregatum",
+      "kategori": "Hortikultura",
+      "varietas_populer": ["Bima Brebes", "Tajuk", "Bauji", "Super Philip", "Maja Cipanas"],
+      "fase_tumbuh_hari": 65,
+      "parameter_biofisik": { "optimal_ph_min": 6.0, "optimal_ph_max": 7.0, "toleransi_salinitas_ds_m": 1.2 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.70, "fase_vegetatif_aktif": 1.05, "fase_pematangan": 0.75 }
+    },
+    {
+      "id_komoditas": "CROP-003",
+      "nama_umum": "Jagung",
+      "nama_ilmiah": "Zea mays",
+      "kategori": "Pangan Utama",
+      "varietas_populer": ["Bisi 18", "Pioneer 21", "NK Perkasa", "Srikandi", "Nusantara 1"],
+      "fase_tumbuh_hari": 105,
+      "parameter_biofisik": { "optimal_ph_min": 5.8, "optimal_ph_max": 7.0, "toleransi_salinitas_ds_m": 1.7 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.30, "fase_vegetatif_aktif": 1.20, "fase_pematangan": 0.35 }
+    },
+    {
+      "id_komoditas": "CROP-004",
+      "nama_umum": "Cabai Merah",
+      "nama_ilmiah": "Capsicum annuum",
+      "kategori": "Hortikultura",
+      "varietas_populer": ["Kopay", "Laba", "Gada", "Laris", "Tanjung-2"],
+      "fase_tumbuh_hari": 110,
+      "parameter_biofisik": { "optimal_ph_min": 6.0, "optimal_ph_max": 6.8, "toleransi_salinitas_ds_m": 1.5 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.60, "fase_vegetatif_aktif": 1.05, "fase_pematangan": 0.90 }
+    },
+    {
+      "id_komoditas": "CROP-005",
+      "nama_umum": "Cabai Rawit",
+      "nama_ilmiah": "Capsicum frutescens",
+      "kategori": "Hortikultura",
+      "varietas_populer": ["Ori 212", "Kaliber", "Dewata", "Bara", "Pelita"],
+      "fase_tumbuh_hari": 120,
+      "parameter_biofisik": { "optimal_ph_min": 5.5, "optimal_ph_max": 6.8, "toleransi_salinitas_ds_m": 1.5 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.60, "fase_vegetatif_aktif": 1.05, "fase_pematangan": 0.90 }
+    },
+    {
+      "id_komoditas": "CROP-006",
+      "nama_umum": "Kedelai",
+      "nama_ilmiah": "Glycine max",
+      "kategori": "Pangan Utama",
+      "varietas_populer": ["Anjasmoro", "Grobogan", "Argomulyo", "Dena 1", "Devon 1"],
+      "fase_tumbuh_hari": 85,
+      "parameter_biofisik": { "optimal_ph_min": 5.8, "optimal_ph_max": 7.0, "toleransi_salinitas_ds_m": 2.0 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.40, "fase_vegetatif_aktif": 1.15, "fase_pematangan": 0.50 }
+    },
+    {
+      "id_komoditas": "CROP-007",
+      "nama_umum": "Tomat",
+      "nama_ilmiah": "Solanum lycopersicum",
+      "kategori": "Hortikultura",
+      "varietas_populer": ["Servo", "Marta", "Karina", "Tymoti", "Betavila"],
+      "fase_tumbuh_hari": 90,
+      "parameter_biofisik": { "optimal_ph_min": 5.5, "optimal_ph_max": 7.0, "toleransi_salinitas_ds_m": 2.5 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.60, "fase_vegetatif_aktif": 1.15, "fase_pematangan": 0.80 }
+    },
+    {
+      "id_komoditas": "CROP-008",
+      "nama_umum": "Kentang",
+      "nama_ilmiah": "Solanum tuberosum",
+      "kategori": "Hortikultura Dataran Tinggi",
+      "varietas_populer": ["Granola", "Atlantik", "Tenggo", "Medians"],
+      "fase_tumbuh_hari": 100,
+      "parameter_biofisik": { "optimal_ph_min": 5.0, "optimal_ph_max": 6.5, "toleransi_salinitas_ds_m": 1.7 },
+      "fao56_koefisien_air_kc": { "fase_awal": 0.50, "fase_vegetatif_aktif": 1.15, "fase_pematangan": 0.75 }
+    }
+  ]
+}

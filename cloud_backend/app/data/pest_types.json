@@ -1,0 +1,111 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-04-02",
+    "description": "Dataset Hama & Patogen dengan Integrasi Parameter Spasial",
+    "total_entries": 10,
+    "source_formats_parsed": ["JPG/PNG (Computer Vision Dataset)", "PDF (Jurnal Entomologi)", "PPTX (Penyuluhan BBPOPT)"]
+  },
+  "data": [
+    {
+      "id_hama": "PEST-001",
+      "nama_umum": "Wereng Batang Coklat",
+      "nama_ilmiah": "Nilaparvata lugens",
+      "target_komoditas_id": ["CROP-001"],
+      "tingkat_bahaya_ekonomi": "Kritis",
+      "gejala_visual_kunci": ["Hopperburn", "Batang gosong kecoklatan", "Tanaman mengering mendadak", "Eksudat embun jelaga"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 5.0, "ambang_batas_laporan_min_pts": 3 },
+      "mitigasi_otomatis": "Penyemprotan insektisida sistemik berbahan aktif Pimetrozin atau BPMC."
+    },
+    {
+      "id_hama": "PEST-002",
+      "nama_umum": "Ulat Grayak Frugiperda",
+      "nama_ilmiah": "Spodoptera frugiperda",
+      "target_komoditas_id": ["CROP-003", "CROP-001"],
+      "tingkat_bahaya_ekonomi": "Kritis",
+      "gejala_visual_kunci": ["Daun robek bergerigi", "Kotoran serbuk gergaji di pucuk/titik tumbuh", "Larva dengan motif 'Y' terbalik di kepala"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 7.5, "ambang_batas_laporan_min_pts": 2 },
+      "mitigasi_otomatis": "Aplikasi bioinsektisida Bacillus thuringiensis atau bahan aktif Emamektin benzoat di sore hari."
+    },
+    {
+      "id_hama": "PEST-003",
+      "nama_umum": "Penggerek Batang Padi",
+      "nama_ilmiah": "Scirpophaga innotata",
+      "target_komoditas_id": ["CROP-001"],
+      "tingkat_bahaya_ekonomi": "Tinggi",
+      "gejala_visual_kunci": ["Sundep (pucuk daun mati/kering)", "Beluk (malai padi putih hampa)", "Terdapat lubang pada pangkal batang"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": false, "radius_bahaya_km": 1.0, "ambang_batas_laporan_min_pts": 5 },
+      "mitigasi_otomatis": "Pengaturan pola tanam serempak, sanitasi sisa jerami, dan rilis parasitoid Trichogramma japonicum."
+    },
+    {
+      "id_hama": "PEST-004",
+      "nama_umum": "Kutu Kebul",
+      "nama_ilmiah": "Bemisia tabaci",
+      "target_komoditas_id": ["CROP-004", "CROP-005", "CROP-007", "CROP-006"],
+      "tingkat_bahaya_ekonomi": "Kritis",
+      "gejala_visual_kunci": ["Daun keriting/mengerut", "Terdapat kerumunan serangga putih kecil di bawah daun", "Vektor Virus Kuning (Gemini)"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 3.0, "ambang_batas_laporan_min_pts": 3 },
+      "mitigasi_otomatis": "Pemasangan yellow sticky trap, pembersihan gulma inang, aplikasi insektisida Abamektin."
+    },
+    {
+      "id_hama": "PEST-005",
+      "nama_umum": "Hawar Daun Bakteri (Kresek)",
+      "nama_ilmiah": "Xanthomonas oryzae pv. oryzae",
+      "target_komoditas_id": ["CROP-001"],
+      "tingkat_bahaya_ekonomi": "Tinggi",
+      "gejala_visual_kunci": ["Bercak basah di tepi daun", "Garis kuning hingga putih meluas", "Terdapat eksudat bakteri kuning seperti embun di pagi hari"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 4.0, "ambang_batas_laporan_min_pts": 4 },
+      "mitigasi_otomatis": "Pengeringan lahan (intermittent irrigation) segera, aplikasi bakterisida golongan tembaga hidroksida."
+    },
+    {
+      "id_hama": "PEST-006",
+      "nama_umum": "Ulat Bawang",
+      "nama_ilmiah": "Spodoptera exigua",
+      "target_komoditas_id": ["CROP-002"],
+      "tingkat_bahaya_ekonomi": "Tinggi",
+      "gejala_visual_kunci": ["Daun berlubang tembus pandang (jendela daun)", "Pucuk daun terpotong", "Larva bersembunyi di dalam rongga daun"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 2.5, "ambang_batas_laporan_min_pts": 3 },
+      "mitigasi_otomatis": "Pemasangan light trap, pemotongan daun yang terinfeksi kelompok telur, aplikasi insektisida Klorantraniliprol."
+    },
+    {
+      "id_hama": "PEST-007",
+      "nama_umum": "Lalat Buah",
+      "nama_ilmiah": "Bactrocera dorsalis",
+      "target_komoditas_id": ["CROP-004", "CROP-005", "CROP-007"],
+      "tingkat_bahaya_ekonomi": "Tinggi",
+      "gejala_visual_kunci": ["Bercak hitam/titik tusukan pada buah", "Buah menguning prematur", "Buah membusuk dan gugur ke tanah"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 5.0, "ambang_batas_laporan_min_pts": 2 },
+      "mitigasi_otomatis": "Pemasangan perangkap atraktan Metil Eugenol, pengumpulan dan pemusnahan buah yang gugur."
+    },
+    {
+      "id_hama": "PEST-008",
+      "nama_umum": "Tikus Sawah",
+      "nama_ilmiah": "Rattus argentiventer",
+      "target_komoditas_id": ["CROP-001", "CROP-003", "CROP-006"],
+      "tingkat_bahaya_ekonomi": "Sangat Kritis",
+      "gejala_visual_kunci": ["Batang terpotong miring membentuk sudut 45 derajat", "Kerusakan terjadi dari tengah petakan sawah", "Terdapat jejak dan lubang aktif di pematang"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 10.0, "ambang_batas_laporan_min_pts": 1 },
+      "mitigasi_otomatis": "Gropyokan massal, pemasangan TBS (Trap Barrier System), pengemposan lubang aktif menggunakan belerang."
+    },
+    {
+      "id_hama": "PEST-009",
+      "nama_umum": "Penyakit Tungro",
+      "nama_ilmiah": "Rice tungro bacilliform virus (RTBV)",
+      "target_komoditas_id": ["CROP-001"],
+      "tingkat_bahaya_ekonomi": "Tinggi",
+      "gejala_visual_kunci": ["Tanaman kerdil", "Daun berwarna kuning hingga jingga dari ujung ke pangkal", "Anakan sedikit"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": true, "radius_bahaya_km": 6.0, "ambang_batas_laporan_min_pts": 3 },
+      "mitigasi_otomatis": "Pengendalian vektor (Wereng Hijau), pencabutan dan pembakaran tanaman terinfeksi (eradikasi)."
+    },
+    {
+      "id_hama": "PEST-010",
+      "nama_umum": "Penyakit Layu Fusarium",
+      "nama_ilmiah": "Fusarium oxysporum",
+      "target_komoditas_id": ["CROP-002", "CROP-004", "CROP-005", "CROP-007", "CROP-008"],
+      "tingkat_bahaya_ekonomi": "Tinggi",
+      "gejala_visual_kunci": ["Daun layu mulai dari bagian bawah menjalar ke atas", "Warna tulang daun memucat", "Pangkal batang berwarna kecoklatan bila dibelah"],
+      "parameter_radar_dbscan": { "potensi_wabah_komunal": false, "radius_bahaya_km": 1.5, "ambang_batas_laporan_min_pts": 5 },
+      "mitigasi_otomatis": "Peningkatan pH tanah menggunakan dolomit, aplikasi agen hayati Trichoderma spp. pada area perakaran."
+    }
+  ]
+}
