@@ -1,0 +1,29 @@
+name: Frontend Build Check (React)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend_web/**'
+
+jobs:
+  build-react:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Installing NPM Dependencies
+        run: |
+          cd frontend_web
+          npm install
+
+      - name: Build React App (Test Compile)
+        run: |
+          cd frontend_web
+          npm run build
