@@ -10,6 +10,8 @@ from pathlib import Path
 from app.models.schemas import NLPRequest, NLPExtractionResult, TelemetryData
 from app.database import SessionLocal, engine, Base, TelemetryRecord
 
+from app.services.nlp_engine import process_farmer_input
+
 # 1. Perintahkan SQLite untuk membuat tabel jika belum ada
 Base.metadata.create_all(bind=engine)
 
@@ -50,42 +52,40 @@ async def root_health_check():
     return {"status": "online", "message": "COGNIFY Knowledge Base terintegrasi!", "total_crops": len(CROP_DB)}
 
 # --- ENDPOINT 2: EKSTRAKSI NLP ---
-@app.post("/api/nlp/extract", response_model=NLPExtractionResult, tags=["Pemrosesan NLP"])
+@app.post("/api/nlp/extract", response_model=NLPExtractionResult, tags=["NLP Model FAO-56"])
 async def extract_agronomy_entities(payload: NLPRequest):
-    teks = payload.raw_text.lower()
-    detected_crop_name = None
-    confidence_score = 0.0
+    """
+    Engine NLP Model FAO-56: 
+    Mengekstrak Komoditas, Hama, Luas Lahan, dan Lokasi dari teks natural petani, 
+    guna menentukan parameter koefisien air (Kc) standar FAO-56.
+    """
+    # Lempar teks ke AI Engine kita
+    hasil_ner = process_farmer_input(payload.raw_text)
     
-    for crop in CROP_DB:
-        if crop["nama_umum"].lower() in teks:
-            detected_crop_name = crop["nama_umum"]
-            confidence_score = 0.85
-            
-        for varietas in crop["varietas_populer"]:
-            if varietas.lower() in teks:
-                detected_crop_name = crop["nama_umum"]
-                confidence_score = 0.98
-                break 
+    if hasil_ner["komoditas"] or hasil_ner["hama"]:
+        # Rangkai pesan respons dengan branding FAO-56
+        msg = f"[Sistem NLP FAO-56] Ekstraksi sukses."
+        if hasil_ner["komoditas"]:
+            msg += f" Komoditas: {hasil_ner['komoditas']} (Var: {hasil_ner['varietas']})."
+        if hasil_ner["hama"]:
+            msg += f" Potensi Ancaman: {hasil_ner['hama']}."
 
-        if detected_crop_name and confidence_score == 0.98:
-            break 
-
-    if detected_crop_name:
         return NLPExtractionResult(
             success=True,
-            message=f"Mendeteksi komoditas {detected_crop_name}. Mengambil data FAO-56...",
-            komoditas=detected_crop_name,
-            luas_lahan_ha=2.0,
-            lokasi="Kandanghaur",
-            confidence=confidence_score
+            message=msg,
+            komoditas=hasil_ner["komoditas"] if hasil_ner["komoditas"] else "Fokus Hama",
+            luas_lahan_ha=hasil_ner["luas_lahan_ha"],
+            lokasi=hasil_ner["lokasi"],
+            confidence=hasil_ner["confidence"]
         )
     
+    # Jika sistem gagal menemukan apa-apa
     return NLPExtractionResult(
         success=False,
-        message="Gagal mengekstrak. Komoditas tidak ditemukan.",
+        message="[Sistem NLP FAO-56] Gagal mendeteksi parameter agrikultur (Komoditas/Hama) dalam kalimat.",
         komoditas="Tidak Diketahui",
-        luas_lahan_ha=0.1,
-        lokasi="Unknown",
+        luas_lahan_ha=0.0,
+        lokasi="Tidak Diketahui",
         confidence=0.0
     )
 
