@@ -4,7 +4,9 @@ torchvision==0.16.2
 ultralytics==8.1.0
 
 # OpenVINO Development Tools (Untuk Kuantisasi FP32 ke INT8)
+openvino==2023.3.0
 openvino-dev[onnx,pytorch]==2023.3.0
+onnx==1.15.0
 
 # MLOps & Experimentation
 jupyterlab==4.0.11
