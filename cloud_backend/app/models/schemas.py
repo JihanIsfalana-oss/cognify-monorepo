@@ -58,11 +58,10 @@ class NLPRequest(BaseModel):
     raw_text: str = Field(..., min_length=3, max_length=500, description="Input bahasa natural dari petani")
 
 class NLPExtractionResult(BaseModel):
-    komoditas: CropType
-    luas_lahan_ha: float = Field(..., gt=0.0, description="Luas lahan dalam Hektar")
-    lokasi: str = Field(..., description="Desa/Kecamatan hasil ekstraksi (e.g., Kandanghaur)")
-    confidence: float = Field(..., ge=0.0, le=1.0)
-
+    komoditas: str  
+    luas_lahan_ha: float
+    lokasi: str
+    confidence: float
 # ==========================================
 # 4. DECISION SUPPORT SCHEMAS (FAO-56 & DBSCAN)
 # ==========================================
@@ -88,3 +87,10 @@ class APIResponse(BaseModel):
     success: bool
     message: str
     data: Optional[dict] = None
+    
+class TelemetryData(BaseModel):
+    device_id: str
+    kelembapan_tanah: float
+    suhu_lingkungan: float
+    ph_tanah: float
+    status_pompa: bool = False
