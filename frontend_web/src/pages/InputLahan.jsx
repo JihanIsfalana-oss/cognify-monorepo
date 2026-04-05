@@ -1,8 +1,7 @@
 import React from 'react';
 import { MessageSquare, ArrowRight, Cpu, Database } from 'lucide-react';
 
-const InputLahan = ({ inputPlanText, setInputPlanText, addNewLand, isProcessing, extractEntities }) => {
-    const extracted = extractEntities(inputPlanText);
+const InputLahan = ({ inputPlanText, setInputPlanText, addNewLand, isProcessing}) => {
     const hasInput = inputPlanText.length > 5;
 
     return (
@@ -78,16 +77,7 @@ const InputLahan = ({ inputPlanText, setInputPlanText, addNewLand, isProcessing,
 
             {hasInput ? (
               <div style={{ display:'flex', flexDirection:'column', gap:10, flex:1, position:'relative', zIndex:1 }}>
-                {[
-                  { tag:'KOMODITAS', value: extracted.komoditas },
-                  { tag:'LUAS LAHAN', value: extracted.luas },
-                  { tag:'LOKASI', value: extracted.lokasi },
-                ].map(({ tag, value }) => (
-                  <div key={tag} style={{ background:'rgba(255,255,255,0.05)', padding:'14px 16px', borderRadius:14, border:'1px solid rgba(255,255,255,0.06)' }}>
-                    <p style={{ fontSize:9, fontWeight:700, color:'var(--green-400)', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:4, marginTop:0 }}>{tag}</p>
-                    <p style={{ fontSize:18, fontWeight:800, letterSpacing:'-0.5px', margin:0, color: value !== 'Tidak Terdeteksi' ? 'white' : 'rgba(255,255,255,0.2)' }}>{value}</p>
-                  </div>
-                ))}
+            
               </div>
             ) : (
               <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', opacity:0.25, position:'relative', zIndex:1 }}>

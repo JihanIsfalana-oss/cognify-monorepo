@@ -4,7 +4,6 @@ import './assets/globals.css';
 
 // 1. Impor Data & Logika
 import { initialLands, initialRegionalPrices, initialInboundRequests } from './data/mockData';
-import { extractEntities } from './utils/nlpEngine';
 
 // 2. Impor Komponen UI
 import Sidebar from './components/Sidebar';
@@ -84,44 +83,71 @@ const App = () => {
     }, 3000);
   };
 
-  // Logika Input Lahan (NLP)
-  const addNewLand = () => {
+  const addNewLand = async () => {
     if (!inputPlanText || inputPlanText.length <= 5) return;
     setIsProcessing(true);
-    setTimeout(() => {
-      const entities = extractEntities(inputPlanText);
+
+    try {
+      // 1. Menembak API NLP FAO-56
+      const response = await fetch('http://127.0.0.1:8000/api/nlp/extract', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ raw_text: inputPlanText })
+      });
+
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      
+      // 2. Menerima Balasan dari AI
+      const aiData = await response.json();
+      console.log("Balasan AI:", aiData);
+
       const newId = Date.now();
       
-      let dynamicName = "Lahan Baru";
-      const hasKomoditas = entities.komoditas !== "Tidak Terdeteksi";
-      const hasLokasi = entities.lokasi !== "Tidak Terdeteksi";
+      // 3. Menggunakan data hasil ekstraksi SpaCy (Backend)
+      const detectedCrop = aiData.komoditas !== "Tidak Diketahui" ? aiData.komoditas : "Belum Ditentukan";
+      const detectedArea = aiData.luas_lahan_ha > 0 ? `${aiData.luas_lahan_ha} Hektar` : "1 Hektar";
+      const detectedLocation = aiData.lokasi !== "Tidak Diketahui" ? aiData.lokasi : "Lokasi Belum Dipetakan";
       
-      if (hasKomoditas && hasLokasi) dynamicName = `Lahan ${entities.komoditas} ${entities.lokasi}`;
-      else if (hasKomoditas) dynamicName = `Lahan ${entities.komoditas} Baru`;
-      else if (hasLokasi) dynamicName = `Lahan Baru ${entities.lokasi}`;
-      else dynamicName = "Lahan Baru (Ekstraksi AI)";
+      let dynamicName = "Lahan Baru";
+      if (aiData.komoditas !== "Tidak Diketahui" && aiData.lokasi !== "Tidak Diketahui") {
+        dynamicName = `Lahan ${aiData.komoditas} ${aiData.lokasi}`;
+      } else if (aiData.komoditas !== "Tidak Diketahui") {
+        dynamicName = `Lahan ${aiData.komoditas} Baru`;
+      } else if (aiData.lokasi !== "Tidak Diketahui") {
+        dynamicName = `Lahan Baru ${aiData.lokasi}`;
+      }
 
       const newLand = {
         id: newId, name: dynamicName, 
-        crop: entities.komoditas !== "Tidak Terdeteksi" ? entities.komoditas : "Belum Ditentukan", 
-        area: entities.luas !== "Tidak Terdeteksi" ? entities.luas : "1 Hektar", 
-        location: entities.lokasi !== "Tidak Terdeteksi" ? entities.lokasi : "Lokasi Belum Dipetakan", 
+        crop: detectedCrop, 
+        area: detectedArea, 
+        location: detectedLocation, 
         budget: 5000000, realSpending: 0, currentDayIdx: 0, 
-        reputationScore: 100,
+        reputationScore: Math.round(aiData.confidence * 100) || 100,
         sensorData: { ph: 7.0, soilMoisture: 50, battery: 100, connection: 'Pending Setup' },
         progress: new Array(10).fill(0),
         tasks: [{ id: Date.now()+1, title: 'Instalasi Edge-Node ESP32', type: 'Hardware', time: '08:00', status: 'pending', priority: 'High' }], 
         revenue: 0
       };
+
+      // 4. Memasukkan Lahan ke Layar
       setLands(prev => [...prev, newLand]);
       setActiveLandId(newId);
       setInputPlanText("");
       setView('dashboard');
-      setIsProcessing(false);
-      addNotification("Lahan Baru Berhasil Diekstraksi & Didaftarkan!");
-    }, 2000);
-  };
 
+      addNotification(aiData.message || "Lahan Baru Berhasil Ditambahkan!");
+
+    } catch (error) {
+      console.error("Gagal menambahkan lahan:", error);
+      addNotification("🚨 Gagal terhubung ke Server!");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   // Logika Pasar Petani (Approve/Reject PO)
   const approvePO = (id) => {
     setInboundRequests(prev => prev.map(req => req.id === id ? { ...req, status: 'approved' } : req));
@@ -230,7 +256,6 @@ const App = () => {
                  setInputPlanText={setInputPlanText}
                  addNewLand={addNewLand}
                  isProcessing={isProcessing}
-                 extractEntities={extractEntities}
                />;
       default:             
         return <LandingPage handleRoleSelection={handleRoleSelection} />;
