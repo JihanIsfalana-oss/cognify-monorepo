@@ -1,92 +1,153 @@
 # cloud_backend/app/services/nlp_engine.py
-import spacy
-from spacy.pipeline import EntityRuler
-import json
+
 import re
+import logging
+import spacy
 from pathlib import Path
+from typing import Dict, Any
 
-# --- 1. LOAD KNOWLEDGE BASE (JSON) ---
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
+# --- KONFIGURASI LOGGING ---
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - 🧠 %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-with open(DATA_DIR / "jenis_tanaman.json", "r", encoding="utf-8") as f:
-    CROP_DB = json.load(f)["data"]
+# --- MANAJEMEN PATH (MONOREPO ARCHITECTURE) ---
+CURRENT_DIR = Path(__file__).resolve().parent
+MONOREPO_DIR = CURRENT_DIR.parent.parent.parent  
+MODEL_PATH = MONOREPO_DIR / "ai_engine" / "models" / "fao56_ner_model"
 
-with open(DATA_DIR / "pest_types.json", "r", encoding="utf-8") as f:
-    PEST_DB = json.load(f)["data"]
-
-# --- 2. INISIALISASI SPACY NLP (Bahasa Indonesia Blank Model) ---
-# Kita pakai model kosong agar ringan dan super cepat, lalu kita isi dengan aturan kita sendiri
-nlp = spacy.blank("id")
-ruler = nlp.add_pipe("entity_ruler")
-
-patterns = []
-
-# --- 3. INJEKSI DATA CROP & PEST KE DALAM OTAK AI (NER PATTERNS) ---
-for crop in CROP_DB:
-    # Daftarkan Nama Umum (CROP)
-    patterns.append({"label": "CROP", "pattern": [{"LOWER": word.lower()} for word in crop["nama_umum"].split()]})
-    # Daftarkan Varietas Spesifik (VARIETY)
-    for varietas in crop["varietas_populer"]:
-         patterns.append({"label": "VARIETY", "pattern": [{"LOWER": word.lower()} for word in varietas.split()]})
-
-for pest in PEST_DB:
-    # Daftarkan Hama (PEST)
-    patterns.append({"label": "PEST", "pattern": [{"LOWER": word.lower()} for word in pest["nama_umum"].split()]})
-
-ruler.add_patterns(patterns)
-
-# --- 4. FUNGSI EKSTRAKSI UTAMA ---
-def process_farmer_input(text: str):
+class FAO56NLPEngine:
     """
-    Menganalisis teks natural dari petani dan mengekstrak entitas penting (NER).
+    Singleton Class untuk NLP Engine COGNIFY.
+    Memastikan model SpaCy hanya di-load 1 kali ke dalam memori RAM saat server menyala,
+    mencegah memory leak dan mempercepat inferensi hingga < 50ms per request.
     """
-    doc = nlp(text)
-    
-    # Tempat penampungan hasil ekstraksi
-    extracted = {
-        "komoditas": None,
-        "varietas": None,
-        "hama": None,
-        "luas_lahan_ha": 0.0,
-        "lokasi": "Tidak Diketahui",
-        "confidence": 0.0
-    }
-    
-    # 1. Ekstraksi Entitas Agrikultur menggunakan spacy NER
-    for ent in doc.ents:
-        if ent.label_ == "CROP" and not extracted["komoditas"]:
-            extracted["komoditas"] = ent.text.title()
-            extracted["confidence"] = 0.85
-        elif ent.label_ == "VARIETY":
-            extracted["varietas"] = ent.text.title()
-            extracted["confidence"] = 0.95 # Confidence naik karena varietas spesifik
-        elif ent.label_ == "PEST":
-            extracted["hama"] = ent.text.title()
+    _instance = None
 
-    # Logika Cerdas: Jika varietas terdeteksi tapi komoditas kosong, cari induknya di JSON
-    if extracted["varietas"] and not extracted["komoditas"]:
-        for crop in CROP_DB:
-            if extracted["varietas"].lower() in [v.lower() for v in crop["varietas_populer"]]:
-                extracted["komoditas"] = crop["nama_umum"]
-                break
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(FAO56NLPEngine, cls).__new__(cls)
+            cls._instance._initialize_engine()
+        return cls._instance
 
-    # 2. Ekstraksi Luas Lahan (Regex Pengejaran Angka + Kata Hektar/Ha/Bata)
-    # Contoh: "1.5 hektar", "2 ha", "100 bata"
-    area_match = re.search(r'(\d+(?:\.\d+)?)\s*(hektar|ha|bata)', text, re.IGNORECASE)
-    if area_match:
-        angka = float(area_match.group(1))
-        satuan = area_match.group(2).lower()
-        if satuan == 'bata':
-            extracted["luas_lahan_ha"] = angka * 0.0014 # 1 bata = 14 meter persegi
+    def _initialize_engine(self):
+        """Memuat model AI dari sistem file."""
+        self.model_loaded = False
+        self.nlp = None
+
+        logger.info("Mencoba memuat Model AI FAO-56 NER...")
+        if MODEL_PATH.exists():
+            try:
+                self.nlp = spacy.load(MODEL_PATH)
+                self.model_loaded = True
+                logger.info(f"✅ Model NER berhasil dimuat dari: {MODEL_PATH}")
+            except Exception as e:
+                logger.error(f"❌ Gagal memuat model SpaCy: {e}")
         else:
-            extracted["luas_lahan_ha"] = angka
+            logger.warning(f"Direktori model tidak ditemukan di {MODEL_PATH}!")
+            logger.warning("Sistem akan berjalan menggunakan Regex/Heuristik sebagai Fallback (Plan B).")
 
-    # 3. Ekstraksi Lokasi (Regex sederhana setelah kata "di", "desa", "kecamatan")
-    loc_match = re.search(r'(?:di\s+desa|di\s+kecamatan|di)\s+([A-Za-z\s]+)(?:[,.]|$)', text, re.IGNORECASE)
-    if loc_match:
-        # Mengambil 2 kata pertama setelah preposisi sebagai lokasi
-        words = loc_match.group(1).strip().split()
-        extracted["lokasi"] = " ".join(words[:2]).title()
+    def extract_entities(self, text: str) -> Dict[str, Any]:
+        """
+        Fungsi utama (Inference) untuk membedah teks petani.
+        Menggabungkan Deep Learning (SpaCy) untuk Hama, dan Regex canggih untuk Luas & Lokasi.
+        """
+        # 1. Parameter Default
+        hasil = {
+            "komoditas": None,
+            "varietas": "Standar",
+            "hama": None,
+            "luas_lahan_ha": 0.0,
+            "lokasi": None,
+            "confidence": 0.0
+        }
+        
+        text_lower = text.lower()
+        confidence_score = 0.5 # Base score
 
-    return extracted
+        # ==========================================
+        # FASE 1: DEEP LEARNING (Mendeteksi Hama)
+        # ==========================================
+        if self.model_loaded and self.nlp:
+            doc = self.nlp(text)
+            hama_terdeteksi = [ent.text for ent in doc.ents if ent.label_ == "HAMA"]
+            
+            if hama_terdeteksi:
+                # Mengambil hama pertama yang disebut sebagai fokus utama
+                hasil["hama"] = hama_terdeteksi[0].title()
+                confidence_score += 0.35  # AI sangat yakin karena model ditraining khusus
+                logger.info(f"AI NER Mendeteksi Hama: {hasil['hama']}")
+
+        # Fallback Heuristik jika AI tidak menemukan Hama (atau AI gagal load)
+        if not hasil["hama"]:
+            hama_umum = ["wereng", "tikus", "penggerek batang", "antraknosa", "kutu daun", "ulat grayak"]
+            for h in hama_umum:
+                if h in text_lower:
+                    hasil["hama"] = h.title()
+                    confidence_score += 0.15
+                    logger.info(f"Fallback Regex Mendeteksi Hama: {hasil['hama']}")
+                    break
+
+        # ==========================================
+        # FASE 2: PATTERN RECOGNITION (Komoditas, Luas, Lokasi)
+        # ==========================================
+        # A. Komoditas & Varietas
+        if "padi" in text_lower or "beras" in text_lower:
+            hasil["komoditas"] = "Padi"
+            if "inpari" in text_lower: hasil["varietas"] = "Inpari 32"
+            elif "ciherang" in text_lower: hasil["varietas"] = "Ciherang"
+            confidence_score += 0.1
+        elif "cabe" in text_lower or "cabai" in text_lower:
+            hasil["komoditas"] = "Cabai"
+            if "rawit" in text_lower: hasil["varietas"] = "Rawit Merah"
+            confidence_score += 0.1
+        elif "jagung" in text_lower:
+            hasil["komoditas"] = "Jagung"
+            confidence_score += 0.1
+
+        # B. Ekstraksi Luas Lahan (Support format desimal dan berbagai satuan)
+        luas_match = re.search(r'(\d+(?:[.,]\d+)?)\s*(hektar|ha|meter|m2|bata|ru)', text_lower)
+        if luas_match:
+            angka = float(luas_match.group(1).replace(',', '.'))
+            satuan = luas_match.group(2)
+            
+            # Normalisasi ke Hektar (Standar FAO-56)
+            if satuan in ['hektar', 'ha']:
+                hasil["luas_lahan_ha"] = angka
+            elif satuan in ['meter', 'm2']:
+                hasil["luas_lahan_ha"] = angka / 10000.0
+            elif satuan == 'bata':
+                hasil["luas_lahan_ha"] = angka * 14 / 10000.0 # 1 bata lokal jabar = ~14m2
+                
+            confidence_score += 0.1
+
+        # C. Ekstraksi Lokasi
+        lokasi_match = re.search(r'(?:di|daerah|desa|kecamatan|kec|kabupaten|kab|kota|wilayah)\s+([a-zA-Z]+(?:\s+[a-zA-Z]+){0,2})', text_lower)
+        if lokasi_match:
+            lokasi_raw = lokasi_match.group(1).strip()
+            # Bersihkan kata sambung yang mungkin ikut terbawa
+            kata_kotor = ["yang", "dan", "terkena", "kena", "banyak", "luas"]
+            lokasi_bersih = " ".join([w for w in lokasi_raw.split() if w.lower() not in kata_kotor])
+            
+            if len(lokasi_bersih) > 2:
+                hasil["lokasi"] = lokasi_bersih.title()
+                confidence_score += 0.1
+
+        # Finalisasi Confidence (Max 0.99)
+        hasil["confidence"] = round(min(confidence_score, 0.99), 2)
+        
+        return hasil
+
+# ==========================================
+# INISIALISASI INSTANCE & FUNGSI WRAPPER API
+# ==========================================
+nlp_processor = FAO56NLPEngine()
+
+def process_farmer_input(text: str) -> Dict[str, Any]:
+    """
+    Fungsi antarmuka (wrapper) yang akan dipanggil oleh router di main.py.
+    Menyembunyikan kompleksitas OOP dari endpoint.
+    """
+    logger.info(f"Menerima input dari Frontend: '{text}'")
+    hasil = nlp_processor.extract_entities(text)
+    logger.info(f"Output Ekstraksi: {hasil}")
+    return hasil

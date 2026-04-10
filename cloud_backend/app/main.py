@@ -23,15 +23,34 @@ def get_db():
     finally:
         db.close()
 
-# --- SETUP PATH & LOAD DATA JSON ---
+# --- SETUP PATH & LOAD DATA JSON DENGAN AMAN ---
+from pathlib import Path
+import json
+
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
+MONOREPO_DIR = BASE_DIR.parent.parent
 
-with open(DATA_DIR / "jenis_tanaman.json", "r", encoding="utf-8") as f:
-    CROP_DB = json.load(f)["data"]
+DATA_DIR = MONOREPO_DIR / "ai_engine" / "data"
 
-with open(DATA_DIR / "pest_types.json", "r", encoding="utf-8") as f:
-    PEST_DB = json.load(f)["data"]
+# 1. Graceful Loading untuk Komoditas
+try:
+    with open(DATA_DIR / "jenis_tanaman.json", "r", encoding="utf-8") as f:
+        CROP_DB = json.load(f).get("data", []) 
+except Exception as e:
+    print(f"⚠️ WARNING DB Komoditas: {e}")
+    CROP_DB = [{"nama": "Padi"}, {"nama": "Jagung"}, {"nama": "Cabai"}] # Data Darurat
+
+# 2. Graceful Loading untuk Hama
+try:
+    pest_file = DATA_DIR / "Pesttype.json"
+    if not pest_file.exists():
+        pest_file = DATA_DIR / "pest_types.json"
+        
+    with open(pest_file, "r", encoding="utf-8") as f:
+        PEST_DB = json.load(f).get("data", [])
+except Exception as e:
+    print(f"⚠️ WARNING DB Hama: {e}")
+    PEST_DB = [{"nama": "Wereng Batang Coklat"}, {"nama": "Penggerek Batang"}] # Data Darurat
 
 # ==========================================
 # INISIALISASI MESIN UTAMA (Ini yang tadi hilang!)
