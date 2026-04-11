@@ -8,37 +8,37 @@ from spacy.util import minibatch, compounding
 import warnings
 
 # --- KONFIGURASI LOGGING ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s -  %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# --- MANAJEMEN PATH ---
 CURRENT_DIR = Path(__file__).resolve().parent
 AI_ENGINE_DIR = CURRENT_DIR.parent.parent  
 
-# Lokasi file dataset dan tempat menyimpan model
-DATA_PATH = AI_ENGINE_DIR / "data" / "Pesttype.json"
-OUTPUT_MODEL_DIR = AI_ENGINE_DIR / "models" / "fao56_ner_model"
+DATA_PATH = AI_ENGINE_DIR / "data" / "nlp_dataset" / "jenis_tanaman.json"
+OUTPUT_MODEL_DIR = AI_ENGINE_DIR / "models" / "fao56_model"
 
-# --- AUGMENTASI DATA (SYNTHETIC DATASET GENERATOR) ---
+# --- AUGMENTASI DATA (KHUSUS INPUT LAHAN BARU) ---
+# Menggenerate ribuan kalimat natural petani saat mendaftarkan lahan
 FARMER_TEMPLATES = [
-    "Kang, lahan saya terkena wabah {}.",
-    "Ada serangan {} di blok timur, parah banget.",
-    "Pestisida yang cocok buat {} apa ya?",
-    "Daun padi saya menguning, sepertinya gara-gara {}.",
-    "Bulan ini {} lagi musim di desa kami.",
-    "Tolong analisis gejala {} pada tanaman jagung.",
-    "Bagaimana mitigasi awal untuk {}?",
-    "Kemarin saya lihat banyak {} nempel di batang.",
-    "Lahan 2 hektar habis dimakan {} dalam semalam.",
-    "Obat sistemik untuk {} harganya berapa?"
+    "Saya mau buka lahan baru untuk tanam {}.",
+    "Rencananya musim ini mau nanam {} seluas 2 hektar.",
+    "Lahan di blok timur akan ditanami {} minggu depan.",
+    "Kang, bibit {} yang tahan cuaca panas apa ya?",
+    "Saya petani {} dari Indramayu.",
+    "Persiapan bajak sawah untuk komoditas {} sudah selesai.",
+    "Berapa estimasi kebutuhan pupuk urea untuk lahan {} 1 ha?",
+    "Bulan depan saya mulai pindah tanam {}.",
+    "Lahan 0.5 hektar ini khusus saya pakai buat {}.",
+    "Sistem irigasi untuk {} bagusnya gimana?"
 ]
 
 def load_and_augment_data(json_path: Path):
-    """Membaca Pesttype.json dan meracik ribuan dataset sintetis untuk training."""
-    logger.info(f"Membaca dataset dari: {json_path}")
+    """Membaca jenis_tanaman.json dan meracik dataset sintetis untuk training."""
+    logger.info(f"Membaca dataset komoditas dari: {json_path}")
     
     if not json_path.exists():
         logger.error(f"File tidak ditemukan: {json_path}")
-        logger.error("Pastikan nama file benar (perhatikan huruf besar/kecil 'Pesttype.json').")
         return []
 
     with open(json_path, 'r', encoding='utf-8') as f:
@@ -48,59 +48,61 @@ def load_and_augment_data(json_path: Path):
             logger.error("Format JSON tidak valid!")
             return []
     
-    pest_list = []
-    items = data.get('data', data) if isinstance(data, dict) else data
+    # Mengekstrak nama_umum dan varietas_populer
+    crop_list = []
+    items = data.get('data', [])
     
     for item in items:
-        if isinstance(item, dict) and 'nama' in item:
-            pest_list.append(item['nama'])
-        elif isinstance(item, str):
-            pest_list.append(item)
+        if isinstance(item, dict):
+            # 1. Ambil Nama Umum (Misal: "Padi", "Jagung")
+            if 'nama_umum' in item:
+                crop_list.append(item['nama_umum'])
+            
+            # 2. Ambil Varietas agar AI makin jenius (Misal: "Inpari 32", "Ciherang")
+            if 'varietas_populer' in item and isinstance(item['varietas_populer'], list):
+                crop_list.extend(item['varietas_populer'])
 
-    if not pest_list:
-        logger.error("Gagal mengekstrak nama hama dari JSON.")
+    if not crop_list:
+        logger.error("❌ Gagal mengekstrak nama tanaman.")
         return []
 
-    logger.info(f"Ditemukan {len(pest_list)} entitas hama. Memulai augmentasi...")
+    # Filter duplikat dan bersihkan string kosong
+    crop_list = list(set([c.strip() for c in crop_list if c.strip()]))
+    logger.info(f"✅ Ditemukan {len(crop_list)} entitas komoditas/varietas. Memulai augmentasi...")
 
     training_data = []
-    for pest in pest_list:
+    for crop in crop_list:
         for template in FARMER_TEMPLATES:
-            text = template.format(pest)
-            # Hitung index karakter untuk Entity HAMA
-            start_idx = text.find(pest)
-            end_idx = start_idx + len(pest)
+            text = template.format(crop)
+            # Hitung index karakter untuk Entity KOMODITAS
+            start_idx = text.find(crop)
+            end_idx = start_idx + len(crop)
             
-            # Format SpaCy V3: (text, {"entities": [(start, end, label)]})
-            training_data.append((text, {"entities": [(start_idx, end_idx, "HAMA")]}))
+            training_data.append((text, {"entities": [(start_idx, end_idx, "KOMODITAS")]}))
     
-    # Acak dataset agar model tidak menghafal urutan
     random.shuffle(training_data)
-    logger.info(f"Dataset berhasil diracik! Total: {len(training_data)} kalimat.")
+    logger.info(f"Dataset Input Lahan berhasil diracik! Total: {len(training_data)} kalimat.")
     return training_data
 
-def train_ner(train_data, output_dir: Path, iterations: int = 35):
-    """Arsitektur Training Neural Network untuk NLP."""
+def train_ner(train_data, output_dir: Path, iterations: int = 30):
+    """Arsitektur Training Neural Network untuk NLP SpaCy."""
     logger.info("Menginisialisasi arsitektur Model Bahasa Indonesia (id)...")
     nlp = spacy.blank("id")
     
-    # Tambahkan 'ner' ke pipeline jika belum ada
     if "ner" not in nlp.pipe_names:
         ner = nlp.add_pipe("ner", last=True)
     else:
         ner = nlp.get_pipe("ner")
         
-    # Daftarkan label entitas ke arsitektur jaringan
     for _, annotations in train_data:
         for ent in annotations.get("entities"):
             ner.add_label(ent[2])
 
-    logger.info(f"Memulai proses Deep Learning selama {iterations} epoch...")
+    logger.info(f"Memulai proses selama {iterations} epoch...")
     
-    # Matikan pipeline lain agar fokus hanya pada NER
     other_pipes = [pipe for pipe in nlp.pipe_names if pipe != "ner"]
     with nlp.disable_pipes(*other_pipes), warnings.catch_warnings():
-        warnings.filterwarning("ignore", category=UserWarning, module='spacy')
+        warnings.filterwarnings("ignore", category=UserWarning, module='spacy')
         
         optimizer = nlp.begin_training()
         
@@ -108,7 +110,6 @@ def train_ner(train_data, output_dir: Path, iterations: int = 35):
             random.shuffle(train_data)
             losses = {}
             
-            # Penggunaan Minibatch yang dinamis (membesar eksponensial)
             batches = minibatch(train_data, size=compounding(4.0, 32.0, 1.001))
             
             for batch in batches:
@@ -118,30 +119,27 @@ def train_ner(train_data, output_dir: Path, iterations: int = 35):
                     example = Example.from_dict(doc, annotations)
                     examples.append(example)
                 
-                # Update bobot (weights) dengan sistem Dropout 0.2 untuk mencegah overfitting
                 nlp.update(
                     examples,
-                    drop=0.2,
+                    drop=0.2, # Mencegah model menghafal (overfitting)
                     sgd=optimizer,
                     losses=losses,
                 )
             
-            # Tampilkan progress setiap 5 epoch
             if (itn + 1) % 5 == 0 or (itn + 1) == iterations:
                 logger.info(f"Epoch {itn+1:02d}/{iterations} selesai -> Loss: {losses['ner']:.4f}")
 
-    # Buat direktori jika belum ada dan simpan model
     output_dir.mkdir(parents=True, exist_ok=True)
     logger.info(f"Menyimpan bobot model ke: {output_dir}")
     nlp.to_disk(output_dir)
-    logger.info("✅ Training Selesai! Model FAO-56 siap diintegrasikan.")
+    logger.info("✅ Training Selesai! siap digunakan.")
 
 if __name__ == "__main__":
     print("="*60)
-    print(" COGNIFY - FAO-56 NLP ENGINE TRAINING SCRIPT ".center(60))
+    print(" COGNIFY - NEW LAND REGISTRATION (NLP TRAINING) ".center(60))
     print("="*60)
     
     dataset = load_and_augment_data(DATA_PATH)
     
     if dataset:
-        train_ner(dataset, OUTPUT_MODEL_DIR, iterations=35)
+        train_ner(dataset, OUTPUT_MODEL_DIR, iterations=30)

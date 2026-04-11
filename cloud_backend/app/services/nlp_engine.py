@@ -7,13 +7,13 @@ from pathlib import Path
 from typing import Dict, Any
 
 # --- KONFIGURASI LOGGING ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - 🧠 %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # --- MANAJEMEN PATH (MONOREPO ARCHITECTURE) ---
 CURRENT_DIR = Path(__file__).resolve().parent
 MONOREPO_DIR = CURRENT_DIR.parent.parent.parent  
-MODEL_PATH = MONOREPO_DIR / "ai_engine" / "models" / "fao56_ner_model"
+MODEL_PATH = MONOREPO_DIR / "ai_engine" / "models" / "fao56_model"
 
 class FAO56NLPEngine:
     """
@@ -65,46 +65,55 @@ class FAO56NLPEngine:
         confidence_score = 0.5 # Base score
 
         # ==========================================
-        # FASE 1: DEEP LEARNING (Mendeteksi Hama)
+        # FASE 1: DEEP LEARNING (Mendeteksi KOMODITAS)
         # ==========================================
         if self.model_loaded and self.nlp:
             doc = self.nlp(text)
-            hama_terdeteksi = [ent.text for ent in doc.ents if ent.label_ == "HAMA"]
+
+            komoditas_terdeteksi = [ent.text for ent in doc.ents if ent.label_ == "KOMODITAS"]
             
-            if hama_terdeteksi:
-                # Mengambil hama pertama yang disebut sebagai fokus utama
-                hasil["hama"] = hama_terdeteksi[0].title()
-                confidence_score += 0.35  # AI sangat yakin karena model ditraining khusus
-                logger.info(f"AI NER Mendeteksi Hama: {hasil['hama']}")
-
-        # Fallback Heuristik jika AI tidak menemukan Hama (atau AI gagal load)
-        if not hasil["hama"]:
-            hama_umum = ["wereng", "tikus", "penggerek batang", "antraknosa", "kutu daun", "ulat grayak"]
-            for h in hama_umum:
-                if h in text_lower:
-                    hasil["hama"] = h.title()
-                    confidence_score += 0.15
-                    logger.info(f"Fallback Regex Mendeteksi Hama: {hasil['hama']}")
-                    break
+            if komoditas_terdeteksi:
+                hasil["komoditas"] = komoditas_terdeteksi[0].title()
+                confidence_score += 0.35  
+                logger.info(f"AI Model FAO-56 Mendeteksi Komoditas: {hasil['komoditas']}")
 
         # ==========================================
-        # FASE 2: PATTERN RECOGNITION (Komoditas, Luas, Lokasi)
+        # FASE 2: PATTERN RECOGNITION & FALLBACK
         # ==========================================
-        # A. Komoditas & Varietas
-        if "padi" in text_lower or "beras" in text_lower:
-            hasil["komoditas"] = "Padi"
-            if "inpari" in text_lower: hasil["varietas"] = "Inpari 32"
-            elif "ciherang" in text_lower: hasil["varietas"] = "Ciherang"
-            confidence_score += 0.1
-        elif "cabe" in text_lower or "cabai" in text_lower:
-            hasil["komoditas"] = "Cabai"
-            if "rawit" in text_lower: hasil["varietas"] = "Rawit Merah"
-            confidence_score += 0.1
-        elif "jagung" in text_lower:
-            hasil["komoditas"] = "Jagung"
-            confidence_score += 0.1
+        
+        # A. Fallback Heuristik untuk Komoditas (Hanya jalan jika AI gagal)
+        if not hasil["komoditas"]:
+            if "padi" in text_lower or "beras" in text_lower:
+                hasil["komoditas"] = "Padi"
+                confidence_score += 0.1
+            elif "cabe" in text_lower or "cabai" in text_lower:
+                hasil["komoditas"] = "Cabai"
+                confidence_score += 0.1
+            elif "jagung" in text_lower:
+                hasil["komoditas"] = "Jagung"
+                confidence_score += 0.1
+            if hasil["komoditas"]:
+                logger.info(f"Fallback Regex Mendeteksi Komoditas: {hasil['komoditas']}")
 
-        # B. Ekstraksi Luas Lahan (Support format desimal dan berbagai satuan)
+        # B. Ekstraksi Varietas (Terpisah dari Komoditas agar AI tidak tertimpa)
+        if hasil["komoditas"]:
+            komo_cek = hasil["komoditas"].lower()
+            if "padi" in komo_cek:
+                if "inpari" in text_lower: hasil["varietas"] = "Inpari 32"
+                elif "ciherang" in text_lower: hasil["varietas"] = "Ciherang"
+            elif "caba" in komo_cek or "cabe" in komo_cek:
+                if "rawit" in text_lower: hasil["varietas"] = "Rawit Merah"
+
+        # C. Ekstraksi Hama (Karena model khusus Komoditas, Hama pakai Regex murni)
+        hama_umum = ["wereng", "tikus", "penggerek batang", "antraknosa", "kutu daun", "ulat grayak"]
+        for h in hama_umum:
+            if h in text_lower:
+                hasil["hama"] = h.title()
+                confidence_score += 0.15
+                logger.info(f"Fallback Regex Mendeteksi Hama: {hasil['hama']}")
+                break
+
+        # D. Ekstraksi Luas Lahan (Support format desimal dan berbagai satuan)
         luas_match = re.search(r'(\d+(?:[.,]\d+)?)\s*(hektar|ha|meter|m2|bata|ru)', text_lower)
         if luas_match:
             angka = float(luas_match.group(1).replace(',', '.'))
@@ -120,11 +129,10 @@ class FAO56NLPEngine:
                 
             confidence_score += 0.1
 
-        # C. Ekstraksi Lokasi
+        # E. Ekstraksi Lokasi
         lokasi_match = re.search(r'(?:di|daerah|desa|kecamatan|kec|kabupaten|kab|kota|wilayah)\s+([a-zA-Z]+(?:\s+[a-zA-Z]+){0,2})', text_lower)
         if lokasi_match:
             lokasi_raw = lokasi_match.group(1).strip()
-            # Bersihkan kata sambung yang mungkin ikut terbawa
             kata_kotor = ["yang", "dan", "terkena", "kena", "banyak", "luas"]
             lokasi_bersih = " ".join([w for w in lokasi_raw.split() if w.lower() not in kata_kotor])
             
