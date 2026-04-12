@@ -73,41 +73,43 @@ async def root_health_check():
 async def extract_agronomy_entities(payload: NLPRequest):
     """
     Engine NLP Model FAO-56: 
-    Mengekstrak Komoditas, Hama, Luas Lahan, dan Lokasi dari teks natural petani.
+    Mengekstrak Komoditas, Luas Lahan (Hektar), dan Sinyal Lokasi Firebase.
     """
     try:
         hasil_ner = process_farmer_input(payload.raw_text)
         
-        if hasil_ner["komoditas"] or hasil_ner["hama"]:
+        # Cek apakah AI berhasil menemukan Komoditas ATAU Lokasi
+        if hasil_ner.get("komoditas") != "Tidak Diketahui" or hasil_ner.get("lokasi") != "Tidak Diketahui":
+            
             # Rangkai pesan respons dengan branding FAO-56
             msg = f"[Sistem NLP FAO-56] Ekstraksi sukses."
-            if hasil_ner["komoditas"]:
-                msg += f" Komoditas: {hasil_ner['komoditas']} (Var: {hasil_ner['varietas']})."
-            if hasil_ner["hama"]:
-                msg += f" Potensi Ancaman: {hasil_ner['hama']}."
+            if hasil_ner.get("komoditas") != "Tidak Diketahui":
+                msg += f" Komoditas: {hasil_ner['komoditas']}."
+            if hasil_ner.get("lokasi") != "Tidak Diketahui":
+                msg += f" Lokasi: {hasil_ner['lokasi']} (Sinyal: {hasil_ner.get('firebase_signal', 'N/A')})."
 
             return NLPExtractionResult(
                 success=True,
                 message=msg,
-                komoditas=hasil_ner["komoditas"] if hasil_ner["komoditas"] else "Fokus Hama",
-                luas_lahan_ha=hasil_ner["luas_lahan_ha"],
-                lokasi=hasil_ner["lokasi"] if hasil_ner["lokasi"] else "Tidak Diketahui",
-                confidence=hasil_ner["confidence"]
+                komoditas=hasil_ner.get("komoditas", "Tidak Diketahui"),
+                luas_lahan_ha=hasil_ner.get("luas_lahan_ha", 0.0),
+                lokasi=hasil_ner.get("lokasi", "Tidak Diketahui"),
+                confidence=hasil_ner.get("confidence", 0.0)
             )
         
         # Jika sistem gagal menemukan apa-apa
         return NLPExtractionResult(
             success=False,
-            message="[Sistem NLP FAO-56] Gagal mendeteksi parameter agrikultur (Komoditas/Hama) dalam kalimat.",
+            message="[Sistem NLP FAO-56] Gagal mendeteksi parameter agrikultur dalam kalimat.",
             komoditas="Tidak Diketahui",
             luas_lahan_ha=0.0,
             lokasi="Tidak Diketahui",
             confidence=0.0
         )
     except Exception as e:
-        # KOREKSI: Melindungi Server dari Crash jika AI mengalami error internal
+        # Melindungi Server dari Crash jika AI mengalami error internal
         print(f"❌ Error Internal NLP: {e}")
-        raise HTTPException(status_code=500, detail="Terjadi kesalahan pada mesin AI NLP.")
+        raise HTTPException(status_code=500, detail=f"Terjadi kesalahan pada model FAO-56: {str(e)}")
 
 @app.get("/api/data/hama", tags=["Database API"])
 async def get_all_pests():

@@ -1,0 +1,20 @@
+{
+  "metadata": {"type": "Geospatial_Trigger", "label": "LOKASI", "total": 15},
+  "data": [
+    {"nama": "Indramayu", "firebase_signal": "ID-JB-IM", "lat": -6.32, "lon": 108.32, "kategori": "Lumbung Padi"},
+    {"nama": "Karawang", "firebase_signal": "ID-JB-KRW", "lat": -6.30, "lon": 107.30, "kategori": "Lumbung Padi"},
+    {"nama": "Subang", "firebase_signal": "ID-JB-SBG", "lat": -6.56, "lon": 107.76, "kategori": "Lumbung Padi"},
+    {"nama": "Brebes", "firebase_signal": "ID-JT-BRB", "lat": -6.87, "lon": 109.04, "kategori": "Sentra Bawang"},
+    {"nama": "Nganjuk", "firebase_signal": "ID-JI-NGJ", "lat": -7.60, "lon": 111.90, "kategori": "Sentra Bawang"},
+    {"nama": "Lembang", "firebase_signal": "ID-JB-LBG", "lat": -6.81, "lon": 107.61, "kategori": "Dataran Tinggi"},
+    {"nama": "Pangalengan", "firebase_signal": "ID-JB-PGL", "lat": -7.16, "lon": 107.56, "kategori": "Dataran Tinggi"},
+    {"nama": "Dieng", "firebase_signal": "ID-JT-DNG", "lat": -7.20, "lon": 109.90, "kategori": "Dataran Tinggi"},
+    {"nama": "Wonosobo", "firebase_signal": "ID-JT-WSB", "lat": -7.36, "lon": 109.90, "kategori": "Dataran Tinggi"},
+    {"nama": "Bantul", "firebase_signal": "ID-YO-BTL", "lat": -7.88, "lon": 110.32, "kategori": "Pangan & Horti"},
+    {"nama": "Sragen", "firebase_signal": "ID-JT-SRG", "lat": -7.42, "lon": 111.01, "kategori": "Lumbung Padi"},
+    {"nama": "Jember", "firebase_signal": "ID-JI-JBR", "lat": -8.17, "lon": 113.69, "kategori": "Pangan Utama"},
+    {"nama": "Malang", "firebase_signal": "ID-JI-MLG", "lat": -7.97, "lon": 112.63, "kategori": "Hortikultura"},
+    {"nama": "Kediri", "firebase_signal": "ID-JI-KDR", "lat": -7.82, "lon": 112.01, "kategori": "Pangan Utama"},
+    {"nama": "Garut", "firebase_signal": "ID-JB-GRT", "lat": -7.22, "lon": 107.90, "kategori": "Hortikultura"}
+  ]
+}

@@ -18,7 +18,8 @@
   },
   "labels":{
     "ner":[
-      "KOMODITAS"
+      "KOMODITAS",
+      "LOKASI"
     ]
   },
   "pipeline":[
