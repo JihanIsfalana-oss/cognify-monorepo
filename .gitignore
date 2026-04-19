@@ -41,6 +41,7 @@ __pycache__/
 *.egg-info/
 .installed.cfg
 .pytest_cache/
+serviceAccountKey.json
 
 # ==========================================
 # 3. VIRTUAL ENVIRONMENTS (Python)

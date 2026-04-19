@@ -4,10 +4,11 @@ uvicorn[standard]==0.27.0
 pydantic==2.5.3
 
 # Cloud & Database
-firebase-admin==6.4.0
+firebase-admin==6.5.0
+pygeohash==1.2.0
 
 # NLP & Data Science
-spacy==3.7.2
+spacy==3.8.14
 scikit-learn==1.4.0
 numpy==1.26.3
 

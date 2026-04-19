@@ -58,10 +58,14 @@ class NLPRequest(BaseModel):
     raw_text: str = Field(..., min_length=3, max_length=500, description="Input bahasa natural dari petani")
 
 class NLPExtractionResult(BaseModel):
-    komoditas: str  
+    success: bool
+    message: str
+    komoditas: str
     luas_lahan_ha: float
     lokasi: str
     confidence: float
+    suhu_lokasi: Optional[float] = 0.0
+    kebutuhan_air_liter: Optional[float] = 0.0
 # ==========================================
 # 4. DECISION SUPPORT SCHEMAS (FAO-56 & DBSCAN)
 # ==========================================
@@ -94,3 +98,5 @@ class TelemetryData(BaseModel):
     suhu_lingkungan: float
     ph_tanah: float
     status_pompa: bool = False
+    lat: float  
+    lon: float
