@@ -1,0 +1,29 @@
+# cognify-monorepo/docker-compose.yml
+
+services:
+  # 1. Layanan API & AI (Backend)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: cognify_api
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./cloud_backend/.env
+    # Menyuntikkan kunci Firebase langsung ke dalam kapsul secara aman
+    volumes:
+      - ./cloud_backend/serviceAccountKey.json:/app/cloud_backend/serviceAccountKey.json:ro
+    restart: unless-stopped
+
+  # 2. Layanan Web Antarmuka (Frontend)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: cognify_web
+    ports:
+      - "3000:80" # Akses web di localhost:3000
+    depends_on:
+      - backend
+    restart: unless-stopped

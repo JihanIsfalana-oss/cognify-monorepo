@@ -1,0 +1,30 @@
+# cognify-monorepo/Dockerfile.backend
+
+# --- TAHAP 1: PONDASI ---
+FROM python:3.11-slim
+
+# Mencegah Python menulis file .pyc dan memastikan log terminal langsung muncul
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# --- TAHAP 2: INSTALASI DEPENDENSI ---
+COPY cloud_backend/requirements-cloud.txt ./cloud_backend/
+
+RUN apt-get update && apt-get install -y build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instal dependensi Python
+RUN pip install --no-cache-dir -r cloud_backend/requirements-cloud.txt
+
+# --- TAHAP 3: PENYATUAN KODE ---
+COPY . .
+
+# Pindah ke dalam folder cloud_backend untuk eksekusi
+WORKDIR /app/cloud_backend
+
+EXPOSE 8000
+
+# Nyalakan server Uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

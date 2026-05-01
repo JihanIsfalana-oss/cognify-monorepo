@@ -1,92 +1,83 @@
-# Python Virtual Environments
-**/venv-cloud/
-**/venv-edge/
-**/venv-train/
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# AI Models (abaikan file temporary)
-ai_engine/data/raw/
-*.tmp
-
 # ==========================================
 # 1. NODE.JS & FRONTEND (React / Vite)
 # ==========================================
-frontend_web/node_modules/
-node_modules/
-dist/
-build/
+**/node_modules/
+**/dist/
+**/build/
+**/.vite/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-.vite/
 
 # ==========================================
 # 2. PYTHON & BACKEND (FastAPI)
 # ==========================================
-__pycache__/
-*.py[cod]
-*$py.class
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
 *.so
 .Python
 *.egg
 *.egg-info/
 .installed.cfg
 .pytest_cache/
-serviceAccountKey.json
 
 # ==========================================
 # 3. VIRTUAL ENVIRONMENTS (Python)
 # ==========================================
-venv/
-env/
-ENV/
-.env_python/
-venv-cloud/
-venv-train/
+**/venv/
+**/env/
+**/ENV/
+**/.env_python/
+**/venv-cloud/
+**/venv-train/
+**/venv-edge/
 
 # ==========================================
 # 4. DATABASE LOKAL
 # ==========================================
 *.sqlite3
 *.db
-cloud_backend/cognify_local.db
-cognify_local.db
+**/cognify_local.db
 
 # ==========================================
-# 5. ENVIRONMENT VARIABLES (Rahasia)
+# 5. ENVIRONMENT VARIABLES & KREDENSIAL (RAHASIA!)
 # ==========================================
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
 *.pem
+**/serviceAccountKey.json
 
 # ==========================================
-# 6. AI & MACHINE LEARNING (OpenVINO)
+# 6. AI & MACHINE LEARNING (SpaCy / OpenVINO)
 # ==========================================
 *.onnx
 *.bin
 *.xml
 *.pt
-datasets/
+**/datasets/
+ai_engine/data/raw/
+*.tmp
+**/.ipynb_checkpoints/
 
 # ==========================================
-# 7. OS & EDITOR FILES
+# 7. IOT & HARDWARE (ESP32 / PlatformIO)
+# ==========================================
+**/.pio/
+**/build_esp32/
+
+# ==========================================
+# 8. OS, EDITOR & SYSTEM FILES
 # ==========================================
 .DS_Store
 Thumbs.db
+.idea/
 .vscode/*
 !.vscode/settings.json
 !.vscode/launch.json
-.idea/
 *.swp
+*.log

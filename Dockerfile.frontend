@@ -1,0 +1,34 @@
+# cognify-monorepo/Dockerfile.frontend
+
+# --- TAHAP 1: BUILDER (Memasak Kode) ---
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Salin file konfigurasi npm
+COPY frontend_web/package.json frontend_web/package-lock.json* ./
+
+# Instal dependensi Node.js
+RUN npm install
+
+# Salin seluruh kode frontend
+COPY frontend_web/ .
+
+# Bangun versi produksi (hasilnya biasanya di folder 'dist' atau 'build')
+RUN npm run build
+
+# --- TAHAP 2: RUNNER (Menyajikan Web dengan Nginx) ---
+FROM nginx:alpine
+
+# Hapus konfigurasi default Nginx
+RUN rm -rf /usr/share/nginx/html/*
+
+# Salin hasil masakan (build/dist) dari Tahap 1 ke dalam server Nginx
+# UBAH KATA 'dist' menjadi 'build' jika Anda menggunakan Create React App standar
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+
+EXPOSE 80
+
+# Nyalakan Nginx
+CMD ["nginx", "-g", "daemon off;"]

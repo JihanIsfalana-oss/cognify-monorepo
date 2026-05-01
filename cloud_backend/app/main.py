@@ -4,7 +4,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 import json
-from pathlib import Path
+from app.core.config import settings
 from google.cloud import firestore
 
 # --- IMPOR SKEMA & DATABASE ---
@@ -21,9 +21,9 @@ DATA_DIR = MONOREPO_DIR / "ai_engine" / "data" / "nlp_dataset"
 
 # Graceful Loading Data Master (Lokal sebagai SSOT)
 try:
-    with open(DATA_DIR / "jenis_tanaman.json", "r", encoding="utf-8") as f:
+    with open(settings.TANAMAN_JSON, "r", encoding="utf-8") as f:
         CROP_DB = json.load(f).get("data", [])
-    with open(DATA_DIR / "pest_types.json", "r", encoding="utf-8") as f:
+    with open(settings.PEST_JSON, "r", encoding="utf-8") as f:
         PEST_DB = json.load(f).get("data", [])
 except Exception as e:
     print(f"⚠️ WARNING Master Data: {e}")

@@ -1,12 +1,8 @@
 # cloud_backend/app/services/weather_bridge.py
 
 import json
-from pathlib import Path
 from .weather_service import WeatherEngine, calculate_et0_simple
-
-CURRENT_DIR = Path(__file__).resolve().parent
-MONOREPO_DIR = CURRENT_DIR.parent.parent.parent
-DATA_PATH = MONOREPO_DIR / "ai_engine" / "data" / "nlp_dataset" / "lokasi.json"
+from app.core.config import settings 
 
 def sync_weather_by_ai_signal(location_name: str):
     """
@@ -14,11 +10,11 @@ def sync_weather_by_ai_signal(location_name: str):
     lokasi yang dideteksi oleh Model FAO-56.
     """
     try:
-        # 1. Load data koordinat dari lokasi.json dengan path yang aman
-        if not DATA_PATH.exists():
-            return {"success": False, "message": f"File Lokasi tidak ditemukan di {DATA_PATH}"}
+        # 1. Load data koordinat MENGGUNAKAN CONFIG SENTRAL
+        if not settings.LOKASI_JSON.exists():
+            return {"success": False, "message": f"File Lokasi tidak ditemukan di {settings.LOKASI_JSON}"}
             
-        with open(DATA_PATH, "r", encoding="utf-8") as f:
+        with open(settings.LOKASI_JSON, "r", encoding="utf-8") as f:
             lokasi_db = json.load(f).get("data", [])
         
         # 2. Cari koordinat berdasarkan nama lokasi
