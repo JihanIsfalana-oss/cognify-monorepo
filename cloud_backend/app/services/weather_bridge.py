@@ -1,6 +1,8 @@
 # cloud_backend/app/services/weather_bridge.py
 
 import json
+import math
+from datetime import datetime
 from .weather_service import WeatherEngine, calculate_et0_simple
 from app.core.config import settings 
 
@@ -29,9 +31,19 @@ def sync_weather_by_ai_signal(location_name: str):
         
         if not data_cuaca:
              return {"success": False, "message": "Gagal menarik data dari API Cuaca."}
+         
+        suhu_min = data_cuaca.get("temp_min", data_cuaca["temp"] - 5.0) 
+        hari_ini_doy = datetime.now().timetuple().tm_yday
+        lat_radian = math.radians(target_geo["lat"])
         
         # 4. Hitung ET0 (Evapotranspirasi Referensi)
-        et0 = calculate_et0_simple(data_cuaca["temp"], data_cuaca["humidity"])
+        et0 = calculate_et0_simple(
+            temp=data_cuaca["temp"], 
+            humidity=data_cuaca["humidity"],
+            temp_min=suhu_min,
+            day_of_year=hari_ini_doy,
+            latitude_rad=lat_radian
+        )
         
         return {
             "success": True,
