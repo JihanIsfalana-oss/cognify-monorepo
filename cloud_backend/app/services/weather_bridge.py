@@ -32,17 +32,20 @@ def sync_weather_by_ai_signal(location_name: str):
         if not data_cuaca:
              return {"success": False, "message": "Gagal menarik data dari API Cuaca."}
          
-        suhu_min = data_cuaca.get("temp_min", data_cuaca["temp"] - 5.0) 
+        suhu_rata = data_cuaca["temp"]
+        # Asumsikan fluktuasi harian +/- 5 derajat dari suhu rata-rata
+        suhu_max = data_cuaca.get("temp_max", suhu_rata + 5.0)
+        suhu_min = data_cuaca.get("temp_min", suhu_rata - 5.0) 
         hari_ini_doy = datetime.now().timetuple().tm_yday
         lat_radian = math.radians(target_geo["lat"])
         
         # 4. Hitung ET0 (Evapotranspirasi Referensi)
         et0 = calculate_et0_simple(
-            temp=data_cuaca["temp"], 
-            humidity=data_cuaca["humidity"],
-            temp_min=suhu_min,
-            day_of_year=hari_ini_doy,
-            latitude_rad=lat_radian
+            suhu_rata, 
+            suhu_max,
+            suhu_min,
+            hari_ini_doy,
+            lat_radian
         )
         
         return {
