@@ -106,6 +106,86 @@
       "gejala_visual_kunci": ["Daun layu mulai dari bagian bawah menjalar ke atas", "Warna tulang daun memucat", "Pangkal batang berwarna kecoklatan bila dibelah"],
       "parameter_radar_dbscan": { "potensi_wabah_komunal": false, "radius_bahaya_km": 1.5, "ambang_batas_laporan_min_pts": 5 },
       "mitigasi_otomatis": "Peningkatan pH tanah menggunakan dolomit, aplikasi agen hayati Trichoderma spp. pada area perakaran."
-    }
+    },
+    {
+    "id_hama": "PEST-011",
+    "nama_umum": "Penyakit Blas",
+    "nama_ilmiah": "Magnaporthe oryzae",
+    "target_komoditas_id": ["CROP-001"],
+    "tingkat_bahaya_ekonomi": "Kritis",
+    "gejala_visual_kunci": ["Bercak belah ketupat bertepi coklat-kuning", "Pangkal malai busuk (leher blast)", "Gabah hampa & biji hitam"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": true, "radius_bahaya_km": 4.0, "ambang_batas_laporan_min_pts": 3},
+    "mitigasi_otomatis": "Aplikasi fungisida berbahan aktif Trisiklazol atau Isoprotiolan. Tanam varietas tahan blas (Inpago 8, Inpago 12)."
+  },
+  {
+    "id_hama": "PEST-012",
+    "nama_umum": "Thrips",
+    "nama_ilmiah": "Thrips parvispinus",
+    "target_komoditas_id": ["CROP-004", "CROP-005", "CROP-007"],
+    "tingkat_bahaya_ekonomi": "Tinggi",
+    "gejala_visual_kunci": ["Daun menggulung ke atas", "Permukaan daun berwarna perak/perunggu", "Serangga sangat kecil terlihat di lipatan daun muda"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": true, "radius_bahaya_km": 2.0, "ambang_batas_laporan_min_pts": 4},
+    "mitigasi_otomatis": "Pemasangan mulsa perak, aplikasi insektisida Spinosad atau Abamektin di pagi hari."
+  },
+  {
+    "id_hama": "PEST-013",
+    "nama_umum": "Antraknosa Cabai",
+    "nama_ilmiah": "Colletotrichum acutatum",
+    "target_komoditas_id": ["CROP-004", "CROP-005"],
+    "tingkat_bahaya_ekonomi": "Kritis",
+    "gejala_visual_kunci": ["Bercak cekung berwarna jingga kecoklatan pada buah", "Buah mengkerut & mengering", "Massa spora oranye terlihat pada bercak basah"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": true, "radius_bahaya_km": 3.0, "ambang_batas_laporan_min_pts": 3},
+    "mitigasi_otomatis": "Panen buah terinfeksi & musnahkan, aplikasi fungisida Mankozeb atau Propineb secara preventif."
+  },
+  {
+    "id_hama": "PEST-014",
+    "nama_umum": "Kutu Daun Persik",
+    "nama_ilmiah": "Myzus persicae",
+    "target_komoditas_id": ["CROP-004", "CROP-005", "CROP-007", "CROP-006"],
+    "tingkat_bahaya_ekonomi": "Tinggi",
+    "gejala_visual_kunci": ["Koloni serangga hijau/kuning di pucuk daun", "Daun keriting & terdistorsi", "Vektor virus CMV & PVY"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": true, "radius_bahaya_km": 3.0, "ambang_batas_laporan_min_pts": 3},
+    "mitigasi_otomatis": "Aplikasi insektisida Pirimikarb (selektif, aman musuh alami) atau Imidakloprid."
+  },
+  {
+    "id_hama": "PEST-015",
+    "nama_umum": "Ulat Daun Kubis",
+    "nama_ilmiah": "Plutella xylostella",
+    "target_komoditas_id": ["CROP-011"],
+    "tingkat_bahaya_ekonomi": "Tinggi",
+    "gejala_visual_kunci": ["Daun berlubang meninggalkan epidermis transparan", "Larva hijau kecil bergerak maju-mundur jika disentuh", "Kotoran halus di permukaan daun"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": true, "radius_bahaya_km": 2.5, "ambang_batas_laporan_min_pts": 3},
+    "mitigasi_otomatis": "Rotasi insektisida: Emamektin benzoat, Klorantraniliprol, atau Bt (Bacillus thuringiensis) secara bergantian."
+  },
+  {
+    "id_hama": "PEST-016",
+    "nama_umum": "Nematoda Sista Kentang",
+    "nama_ilmiah": "Globodera rostochiensis",
+    "target_komoditas_id": ["CROP-008"],
+    "tingkat_bahaya_ekonomi": "Kritis",
+    "gejala_visual_kunci": ["Tanaman menguning & kerdil berkelompok", "Akar bernanah, terdapat kista putih/kuning kecil", "Umbi kecil dan sedikit"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": false, "radius_bahaya_km": 1.5, "ambang_batas_laporan_min_pts": 5},
+    "mitigasi_otomatis": "Rotasi tanaman 4-6 tahun, penggunaan varietas tahan (Granola L), fumigasi tanah dengan Karbofuran."
+  },
+  {
+    "id_hama": "PEST-017",
+    "nama_umum": "Hawar Daun Alternaria",
+    "nama_ilmiah": "Alternaria solani",
+    "target_komoditas_id": ["CROP-007", "CROP-008"],
+    "tingkat_bahaya_ekonomi": "Tinggi",
+    "gejala_visual_kunci": ["Bercak konsentris coklat tua seperti 'sasaran tembak'", "Tepi bercak berwarna kuning", "Daun tua paling awal terinfeksi"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": true, "radius_bahaya_km": 2.0, "ambang_batas_laporan_min_pts": 4},
+    "mitigasi_otomatis": "Aplikasi fungisida Iprodion atau Klorotalonil. Hindari penyiraman dari atas (overhead irrigation)."
+  },
+  {
+    "id_hama": "PEST-018",
+    "nama_umum": "Busuk Batang Sklerotium",
+    "nama_ilmiah": "Sclerotium rolfsii",
+    "target_komoditas_id": ["CROP-002", "CROP-006", "CROP-009"],
+    "tingkat_bahaya_ekonomi": "Tinggi",
+    "gejala_visual_kunci": ["Pangkal batang membusuk berwarna coklat", "Miselium putih seperti kapas di pangkal batang", "Terdapat badan buah (sklerotia) berwarna coklat seukuran biji sesawi"],
+    "parameter_radar_dbscan": {"potensi_wabah_komunal": false, "radius_bahaya_km": 1.0, "ambang_batas_laporan_min_pts": 5},
+    "mitigasi_otomatis": "Sanitasi sisa tanaman menyeluruh, aplikasi fungisida Benomil atau agen hayati Trichoderma harzianum di zona perakaran."
+  }
   ]
 }
