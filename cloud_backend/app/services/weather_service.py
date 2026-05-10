@@ -3,6 +3,7 @@
 import os
 import requests
 import logging
+import math
 from typing import Dict, Any
 from dotenv import load_dotenv
 
@@ -50,10 +51,17 @@ class WeatherEngine:
             logger.error(f"Gagal mengambil data cuaca: {e}")
             return None
 
-def calculate_et0_simple(temp: float, humidity: float) -> float:
-    """
-    Estimasi sederhana Reference Evapotranspiration (ET0) 
-    menggunakan metode Hargreaves (bagian dari standar FAO-56).
-    """
-    et0 = 0.0023 * (temp + 17.8) * (temp ** 0.5) * 0.408 
+def calculate_et0_simple(temp_mean: float, temp_max: float, temp_min: float, 
+                               day_of_year: int, latitude_rad: float) -> float:
+    # 1. Hitung Ra (extraterrestrial radiation) dalam MJ/m²/day
+    dr = 1 + 0.033 * math.cos(2 * math.pi / 365 * day_of_year)
+    delta = 0.409 * math.sin(2 * math.pi / 365 * day_of_year - 1.39)
+    ws = math.acos(-math.tan(latitude_rad) * math.tan(delta))
+    Ra = (24 * 60 / math.pi) * 0.0820 * dr * (
+        ws * math.sin(latitude_rad) * math.sin(delta) +
+        math.cos(latitude_rad) * math.cos(delta) * math.sin(ws)
+    )
+    
+    # 2. Hitung ET0 Hargreaves (satuan mm/hari)
+    et0 = 0.0023 * Ra * (temp_mean + 17.8) * math.sqrt(temp_max - temp_min)
     return round(et0, 2)

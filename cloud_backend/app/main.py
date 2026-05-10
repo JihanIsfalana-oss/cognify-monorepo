@@ -14,20 +14,17 @@ from app.services.weather_bridge import sync_weather_by_ai_signal
 from app.services.geo_radar import scan_nearby_threats
 from app.models.schemas import NLPRequest, NLPExtractionResult, TelemetryData
 
-# --- SETUP PATH DATA MASTER ---
-BASE_DIR = Path(__file__).resolve().parent
-MONOREPO_DIR = BASE_DIR.parent.parent
-DATA_DIR = MONOREPO_DIR / "ai_engine" / "data" / "nlp_dataset"
-
 # Graceful Loading Data Master (Lokal sebagai SSOT)
 try:
     with open(settings.TANAMAN_JSON, "r", encoding="utf-8") as f:
         CROP_DB = json.load(f).get("data", [])
     with open(settings.PEST_JSON, "r", encoding="utf-8") as f:
         PEST_DB = json.load(f).get("data", [])
+    with open(settings.LOKASI_JSON, "r", encoding="utf-8") as f:  
+        LOKASI_DB = json.load(f).get("data", [])                  
 except Exception as e:
     print(f"⚠️ WARNING Master Data: {e}")
-    CROP_DB, PEST_DB = [], []
+    CROP_DB, PEST_DB, LOKASI_DB = [], [], []
 
 
 # --- INISIALISASI APP ---
