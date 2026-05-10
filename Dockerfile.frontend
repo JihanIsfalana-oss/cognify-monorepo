@@ -3,6 +3,8 @@
 # --- TAHAP 1: BUILDER (Memasak Kode) ---
 FROM node:22-alpine AS builder
 
+LABEL org.opencontainers.image.source="https://github.com/jihanisfalana-oss/cognify-monorepo"
+
 WORKDIR /app
 
 # Salin file konfigurasi npm
